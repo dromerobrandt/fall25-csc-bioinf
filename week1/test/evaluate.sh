@@ -7,8 +7,7 @@ echo "--------------------------------------------------------------------------
 
 # Directory containing the code
 CODE_DIR="../code"
-cd "$CODE_DIR"
-codon build -release -exe main.py
+
 # Loop through datasets data1 to data4
 for dataset in data1 data2 data3 data4; do
     # Test Python version
