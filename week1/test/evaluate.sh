@@ -43,14 +43,6 @@ for dataset in data1 data2 data3 data4; do
     # Test Codon version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    # Make sure the executable exists and is executable
-    if [ ! -f "./main" ]; then
-        echo "Error: Codon executable not found in $CODE_DIR"
-        exit 1
-    fi
-    if [ ! -x "./main" ]; then
-        chmod +x ./main
-    fi
     codon_output=$(codon run main.py "$dataset" 2>&1)
     end_time=$(date +%s)
     cd - > /dev/null
