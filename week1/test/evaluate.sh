@@ -45,9 +45,9 @@ for dataset in data1 data2 data3 data4; do
     cd "$CODE_DIR"
     echo "works6"
     codon_output=$(./main "$dataset" 2>&1)
+    echo "works7"
     end_time=$(date +%s)
     cd - > /dev/null
-    echo "works7"
     # Calculate runtime for Codon
     codon_runtime=$((end_time - start_time))
     codon_minutes=$((codon_runtime / 60))
