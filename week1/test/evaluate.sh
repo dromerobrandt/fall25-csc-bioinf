@@ -16,7 +16,6 @@ for dataset in data1 data2 data3 data4; do
     # Test Python version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    codon run main.py "$dataset"
     python_output=$(python main.py "$dataset" 2>&1)
     end_time=$(date +%s)
     cd - > /dev/null
