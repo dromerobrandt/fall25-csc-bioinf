@@ -18,7 +18,7 @@ for dataset in data1 data2 data3 data4; do
     echo "works2"
     end_time=$(date +%s)
     cd - > /dev/null
-    
+    echo "works3"
     # Calculate runtime for Python
     python_runtime=$((end_time - start_time))
     python_minutes=$((python_runtime / 60))
@@ -29,7 +29,7 @@ for dataset in data1 data2 data3 data4; do
     python_lengths=$(echo "$python_output" | grep -E "^[0-9]+ [0-9]+$" | awk '{print $2}' | sort -nr)
     python_total_length=$(echo "$python_lengths" | awk '{sum += $1} END {print sum}')
     python_half_length=$((python_total_length / 2))
-    
+    echo "works4"
     python_n50=0
     python_current_length=0
     for length in $python_lengths; do
@@ -39,14 +39,15 @@ for dataset in data1 data2 data3 data4; do
             break
         fi
     done
-    
+    echo "works5"
     # Test Codon version
     start_time=$(date +%s)
     cd "$CODE_DIR"
+    echo "works6"
     codon_output=$(./main "$dataset" 2>&1)
     end_time=$(date +%s)
     cd - > /dev/null
-    
+    echo "works7"
     # Calculate runtime for Codon
     codon_runtime=$((end_time - start_time))
     codon_minutes=$((codon_runtime / 60))
