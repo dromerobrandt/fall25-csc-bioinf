@@ -13,12 +13,10 @@ for dataset in data1 data2 data3 data4; do
     # Test Python version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    echo "works1"
     python_output=$(python main.py "$dataset" 2>&1)
-    echo "works2"
     end_time=$(date +%s)
     cd - > /dev/null
-    echo "works3"
+
     # Calculate runtime for Python
     python_runtime=$((end_time - start_time))
     python_minutes=$((python_runtime / 60))
@@ -29,7 +27,6 @@ for dataset in data1 data2 data3 data4; do
     python_lengths=$(echo "$python_output" | grep -E "^[0-9]+ [0-9]+$" | awk '{print $2}' | sort -nr)
     python_total_length=$(echo "$python_lengths" | awk '{sum += $1} END {print sum}')
     python_half_length=$((python_total_length / 2))
-    echo "works4"
     python_n50=0
     python_current_length=0
     for length in $python_lengths; do
@@ -39,15 +36,51 @@ for dataset in data1 data2 data3 data4; do
             break
         fi
     done
-    echo "works5"
+
     # Test Codon version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    echo "works6"
+    
+    # Debugging information
+    echo "Current directory: $(pwd)" >&2
+    echo "Files in directory:" >&2
+    ls -la >&2
+
+    # Check if main exists and is executable
+    if [ ! -f "./main" ]; then
+        echo "Error: ./main does not exist in $(pwd)" >&2
+        exit 1
+    fi
+
+    if [ ! -x "./main" ]; then
+        echo "Error: ./main is not executable. Attempting to fix permissions..." >&2
+        chmod +x ./main
+        if [ ! -x "./main" ]; then
+            echo "Error: Failed to make ./main executable" >&2
+            exit 1
+        fi
+    fi
+
+    # Check file type and dependencies
+    echo "File information for ./main:" >&2
+    file ./main >&2
+    echo "Checking dependencies for ./main:" >&2
+    ldd ./main 2>&1 || echo "ldd command not found or not applicable" >&2
+
+    # Now try to run the executable
+    echo "Attempting to run ./main with dataset $dataset..." >&2
     codon_output=$(./main "$dataset" 2>&1)
-    echo "works7"
+    codon_exit_code=$?
+
+    if [ $codon_exit_code -ne 0 ]; then
+        echo "Error: ./main failed with exit code $codon_exit_code" >&2
+        echo "Output: $codon_output" >&2
+        exit $codon_exit_code
+    fi
+
     end_time=$(date +%s)
     cd - > /dev/null
+
     # Calculate runtime for Codon
     codon_runtime=$((end_time - start_time))
     codon_minutes=$((codon_runtime / 60))
