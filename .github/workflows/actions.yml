@@ -1,31 +1,28 @@
-name: GitHub CI
+name: Github CI
 on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Install Codon
         run: |
           mkdir -p ${HOME}/.codon
           curl -L https://github.com/exaloop/codon/releases/download/v0.19.3/codon-linux-x86_64.tar.gz | tar zxvf - --strip-components=1 -C ${HOME}/.codon
           curl -L https://github.com/exaloop/seq/releases/download/v0.11.5/seq-linux-x86_64.tar.gz | tar zxvf - -C ${HOME}/.codon/lib/codon/plugins
-          echo "${HOME}/.codon/bin" >> $GITHUB_PATH  # CRITICAL FIX - persist PATH across steps
-
-      - name: Verify Codon installation
-        run: codon --version
-
-      - name: Check out repository
+          export PATH=${PATH}:${HOME}/.codon/bin
+      - name: Check out repository code
         uses: actions/checkout@v5
-
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-
       - name: Set up Codon Python bridge
         run: |
-          CODON_PYTHON=$(curl -L https://raw.githubusercontent.com/exaloop/codon/refs/heads/develop/test/python/find-python-library.py | python)
-          echo "CODON_PYTHON=$CODON_PYTHON" >> $GITHUB_ENV
-
+          pip install find_libpython
+          export CODON_PYTHON=$(find_libpython)
+          echo "Found Python at: ${CODON_PYTHON}"
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
@@ -34,5 +31,4 @@ jobs:
           cd week1/code
           codon compile main.py -o main --python-lib $CODON_PYTHON
           chmod +x main
-          cd ../test
-          bash evaluate.sh
+          cd ../test && bash evaluate.sh
