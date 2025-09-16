@@ -51,7 +51,7 @@ for dataset in data1 data2 data3 data4; do
     if [ ! -x "./main" ]; then
         chmod +x ./main
     fi
-    codon_output=$(./main "$dataset" 2>&1)
+    codon_output=$(codon run main.py "$dataset" 2>&1)
     end_time=$(date +%s)
     cd - > /dev/null
     
