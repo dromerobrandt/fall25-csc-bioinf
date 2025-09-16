@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Ensure the Codon library path is set
+export LD_LIBRARY_PATH=/opt/codon/lib:$LD_LIBRARY_PATH
+
 # Create header for the output table
 echo -e "Dataset \tLanguage\tRuntime \tN50"
 echo "-------------------------------------------------------------------------------------------------------"
@@ -40,50 +43,18 @@ for dataset in data1 data2 data3 data4; do
     # Test Codon version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    
-    # Check for missing libraries
-    missing_libs=$(ldd ./main 2>&1 | grep "not found" | awk '{print $1}')
-    if [ -n "$missing_libs" ]; then
-        echo "Error: Missing required libraries: $missing_libs" >&2
-        echo "Attempting to install missing dependencies..." >&2
-        
-        # Try to install the missing libraries
-        if command -v apt-get >/dev/null 2>&1; then
-            echo "Using apt-get to install dependencies..." >&2
-            sudo apt-get update
-            sudo apt-get install -y libomp-dev
-            # Note: libcodonrt.so might need to be installed separately
-        elif command -v yum >/dev/null 2>&1; then
-            echo "Using yum to install dependencies..." >&2
-            sudo yum install -y libgomp
-        else
-            echo "Error: No known package manager found. Please install libomp and libcodonrt manually." >&2
-            exit 1
-        fi
-        
-        # Check again if libraries are still missing
-        still_missing=$(ldd ./main 2>&1 | grep "not found" | awk '{print $1}')
-        if [ -n "$still_missing" ]; then
-            echo "Error: Still missing libraries after installation attempt: $still_missing" >&2
-            echo "Please ensure the Codon runtime is properly installed." >&2
-            exit 1
-        fi
+    # Make sure the executable exists and is executable
+    if [ ! -f "./main" ]; then
+        echo "Error: Codon executable not found in $CODE_DIR"
+        exit 1
     fi
-
-    # Now try to run the executable
-    echo "Attempting to run ./main with dataset $dataset..." >&2
+    if [ ! -x "./main" ]; then
+        chmod +x ./main
+    fi
     codon_output=$(./main "$dataset" 2>&1)
-    codon_exit_code=$?
-
-    if [ $codon_exit_code -ne 0 ]; then
-        echo "Error: ./main failed with exit code $codon_exit_code" >&2
-        echo "Output: $codon_output" >&2
-        exit $codon_exit_code
-    fi
-
     end_time=$(date +%s)
     cd - > /dev/null
-
+    
     # Calculate runtime for Codon
     codon_runtime=$((end_time - start_time))
     codon_minutes=$((codon_runtime / 60))

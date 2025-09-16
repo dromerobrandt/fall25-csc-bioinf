@@ -73,4 +73,8 @@ jobs:
           echo "PATH: $PATH"
 
       - name: Week 1
-        run: cd week1/test && bash evaluate.sh
+        run: |
+          # Set environment variables explicitly for this step
+          export LD_LIBRARY_PATH=/opt/codon/lib:$LD_LIBRARY_PATH
+          export PATH=/opt/codon/bin:$PATH
+          cd week1/test && bash evaluate.sh
