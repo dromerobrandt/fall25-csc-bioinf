@@ -1,9 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# Ensure the Codon library path is set
-export LD_LIBRARY_PATH=/opt/codon/lib:$LD_LIBRARY_PATH
-
 # Create header for the output table
 echo -e "Dataset \tLanguage\tRuntime \tN50"
 echo "-------------------------------------------------------------------------------------------------------"
@@ -43,7 +40,7 @@ for dataset in data1 data2 data3 data4; do
     # Test Codon version
     start_time=$(date +%s)
     cd "$CODE_DIR"
-    codon_output=$(codon run main.py "$dataset" 2>&1)
+    codon_output=$(./main "$dataset" 2>&1)
     end_time=$(date +%s)
     cd - > /dev/null
     

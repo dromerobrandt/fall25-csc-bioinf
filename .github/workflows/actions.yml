@@ -48,4 +48,7 @@ jobs:
           codon --version
 
       - name: Week 1
-        run: cd week1/test && bash evaluate.sh
+        run: |
+          cd week1/code
+          codon build -release -exe main.py
+          cd ../test && bash evaluate.sh
