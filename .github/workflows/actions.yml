@@ -32,14 +32,24 @@ jobs:
 
       - name: Install Codon
         run: |
-          # Install Codon using the official installer
-          curl -fsSL https://exaloop.io/install.sh | bash -s -- --prefix=/opt/codon
+          # Create directory for Codon
+          sudo mkdir -p /opt/codon
+          sudo chown $USER:$USER /opt/codon
+
+          # Download and extract Codon
+          curl -L https://github.com/exaloop/codon/releases/download/v0.19.3/codon-linux-x86_64.tar.gz | tar zxvf - --strip-components=1 -C /opt/codon
 
           # Add Codon to PATH
           echo "/opt/codon/bin" >> $GITHUB_PATH
 
           # Set library path for Codon
           echo "LD_LIBRARY_PATH=/opt/codon/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+          # Update library cache
+          sudo ldconfig
+
+          # Verify installation
+          ls -la /opt/codon/lib/
 
           # Install seq plugin
           mkdir -p /opt/codon/lib/codon/plugins
@@ -54,6 +64,13 @@ jobs:
 
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: Verify libraries
+        run: |
+          echo "Checking for libcodonrt.so..."
+          find /opt/codon -name "libcodonrt.so" -exec ls -la {} \;
+          echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+          echo "PATH: $PATH"
 
       - name: Week 1
         run: cd week1/test && bash evaluate.sh
