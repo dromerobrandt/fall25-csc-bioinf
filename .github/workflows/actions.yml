@@ -27,4 +27,6 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
       - name: Week 1
-        run: cd week1/test && bash evaluate.sh
+        run: |
+          export PATH="${HOME}/.codon/bin:${PATH}"
+          cd week1/test && bash evaluate.sh
