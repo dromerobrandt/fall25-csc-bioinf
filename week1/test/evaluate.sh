@@ -41,31 +41,34 @@ for dataset in data1 data2 data3 data4; do
     start_time=$(date +%s)
     cd "$CODE_DIR"
     
-    # Debugging information
-    echo "Current directory: $(pwd)" >&2
-    echo "Files in directory:" >&2
-    ls -la >&2
-
-    # Check if main exists and is executable
-    if [ ! -f "./main" ]; then
-        echo "Error: ./main does not exist in $(pwd)" >&2
-        exit 1
-    fi
-
-    if [ ! -x "./main" ]; then
-        echo "Error: ./main is not executable. Attempting to fix permissions..." >&2
-        chmod +x ./main
-        if [ ! -x "./main" ]; then
-            echo "Error: Failed to make ./main executable" >&2
+    # Check for missing libraries
+    missing_libs=$(ldd ./main 2>&1 | grep "not found" | awk '{print $1}')
+    if [ -n "$missing_libs" ]; then
+        echo "Error: Missing required libraries: $missing_libs" >&2
+        echo "Attempting to install missing dependencies..." >&2
+        
+        # Try to install the missing libraries
+        if command -v apt-get >/dev/null 2>&1; then
+            echo "Using apt-get to install dependencies..." >&2
+            sudo apt-get update
+            sudo apt-get install -y libomp-dev
+            # Note: libcodonrt.so might need to be installed separately
+        elif command -v yum >/dev/null 2>&1; then
+            echo "Using yum to install dependencies..." >&2
+            sudo yum install -y libgomp
+        else
+            echo "Error: No known package manager found. Please install libomp and libcodonrt manually." >&2
+            exit 1
+        fi
+        
+        # Check again if libraries are still missing
+        still_missing=$(ldd ./main 2>&1 | grep "not found" | awk '{print $1}')
+        if [ -n "$still_missing" ]; then
+            echo "Error: Still missing libraries after installation attempt: $still_missing" >&2
+            echo "Please ensure the Codon runtime is properly installed." >&2
             exit 1
         fi
     fi
-
-    # Check file type and dependencies
-    echo "File information for ./main:" >&2
-    file ./main >&2
-    echo "Checking dependencies for ./main:" >&2
-    ldd ./main 2>&1 || echo "ldd command not found or not applicable" >&2
 
     # Now try to run the executable
     echo "Attempting to run ./main with dataset $dataset..." >&2

@@ -27,4 +27,7 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
       - name: Week 1
-        run: cd week1/test && bash evaluate.sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libomp-dev
+          cd week1/test && bash evaluate.sh
