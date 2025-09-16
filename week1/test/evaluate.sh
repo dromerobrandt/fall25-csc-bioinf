@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Create header for the output table
 echo -e "Dataset \tLanguage\tRuntime \tN50"
